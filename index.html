@@ -36,12 +36,10 @@
   </select>
 
   <label for="playerCount">Number of Players (3 to 10)</label>
-  <input type="number" id="playerCount" value="3" min="3" max="10" />
+  <input type="number" id="playerCount" value="10" min="3" max="10" />
 
   <label for="playerNamesInput">Player Names (comma separated)</label>
   <input type="text" id="playerNamesInput" placeholder="e.g. Alice, Bob, Charlie" />
-
-  <label><input type="checkbox" id="includeLGBTQ" checked /> Include LGBTQ+ character option</label>
 
   <button onclick="generateAndDisplay()">Generate Mystery</button>
   <button onclick="downloadPDF()" style="margin-left:10px;">Download PDF</button>
@@ -233,5 +231,6 @@
 
 </body>
 </html>
+
 
 
