@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Murder Mystery Generator - Enhanced with PDF Export</title>
+<style>
+  body { font-family: sans-serif; padding: 20px; background: #f9f9f9; }
+  h1 { color: #222; }
+  .box { background: white; padding: 15px; margin-top: 10px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+  label { font-weight: bold; display: block; margin-top: 10px; }
+  select, input[type=number], input[type=text] { width: 100%; padding: 8px; margin-top: 5px; }
+  button { margin-top: 15px; padding: 10px 18px; font-size: 16px; cursor: pointer; }
+  ul { margin-left: 20px; }
+</style>
+
+<!-- Include jsPDF from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+</head>
+<body>
+
+<h1>Murder Mystery Generator - Enhanced</h1>
+
+<div class="box">
+  <label for="settingSelect">Choose Setting (or Random)</label>
+  <select id="settingSelect">
+    <option value="random">-- Random Setting --</option>
+    <option value="Karaoke bar in Shimane, Japan">Karaoke bar in Shimane, Japan</option>
+    <option value="Luxury cruise ship">Luxury cruise ship</option>
+    <option value="Remote mountain inn">Remote mountain inn</option>
+    <option value="Tech startup office">Tech startup office</option>
+    <option value="Gothic mansion during a thunderstorm">Gothic mansion during a thunderstorm</option>
+    <option value="Space Station Orbiting Earth">Space Station Orbiting Earth</option>
+    <option value="Haunted Victorian Hotel">Haunted Victorian Hotel</option>
+  </select>
+
+  <label for="playerCount">Number of Players (3 to 6)</label>
+  <input type="number" id="playerCount" value="3" min="3" max="6" />
+
+  <label for="playerNamesInput">Player Names (comma separated)</label>
+  <input type="text" id="playerNamesInput" placeholder="e.g. Alice, Bob, Charlie" />
+
+  <label><input type="checkbox" id="includeLGBTQ" checked /> Include LGBTQ+ character option</label>
+
+  <button onclick="generateAndDisplay()">Generate Mystery</button>
+  <button onclick="downloadPDF()" style="margin-left:10px;">Download PDF</button>
+</div>
+
+<div id="output" class="box" style="display:none;"></div>
+
+<script>
+  const allSettings = [
+    "Karaoke bar in Shimane, Japan",
+    "Luxury cruise ship",
+    "Remote mountain inn",
+    "Tech startup office",
+    "Gothic mansion during a thunderstorm",
+    "Space Station Orbiting Earth",
+    "Haunted Victorian Hotel"
+  ];
+
+  const allCharacters = [
+    { role: "Pop Idol", secret: "Being blackmailed about a past relationship", motive: "Avoid scandal and protect her career", lgbtq: false },
+    { role: "City Council Aide", secret: "Accepted bribes to help Ren", motive: "Silence Ren before he leaked info", lgbtq: false },
+    { role: "Bartender and former lover", secret: "Threatened Ren after discovering betrayal", motive: "Keep the bar from being sold", lgbtq: false },
+    { role: "Tech Genius", secret: "Hacked sensitive files", motive: "Prevent exposure of illegal activities", lgbtq: false },
+    { role: "Fashion Blogger", secret: "Stole designs from a rival", motive: "Maintain reputation", lgbtq: true },
+    { role: "Journalist", secret: "Investigating corruption", motive: "Get the scoop first", lgbtq: false }
+  ];
+
+  const allClues = [
+    "Autopsy: Strangled with mic cord. No signs of struggle.",
+    "Lipstick on mic cord matches someone's shade.",
+    "USB drive wiped clean.",
+    "Threatening note on song request slip.",
+    "Sound booth log: 3 entries in 30 mins.",
+    "Partial voice memo: 'If I go down... so do you.'",
+    "Secret email between two suspects discovered.",
+    "A broken watch stopped at the estimated time of death.",
+    "Footprints near the scene belong to a rare shoe brand.",
+    "A threatening text message was sent just before the murder."
+  ];
+
+  function shuffleArray(arr) {
+    return arr.sort(() => Math.random() - 0.5);
+  }
+
+  function generateAndDisplay() {
+    const settingSelect = document.getElementById("settingSelect");
+    const playerCountInput = document.getElementById("playerCount");
+    const playerNamesInput = document.getElementById("playerNamesInput");
+    const includeLGBTQ = document.getElementById("includeLGBTQ").checked;
+    const output = document.getElementById("output");
+
+    let setting = settingSelect.value === "random" ? allSettings[Math.floor(Math.random() * allSettings.length)] : settingSelect.value;
+    let playerCount = parseInt(playerCountInput.value);
+    if (isNaN(playerCount) || playerCount < 3) playerCount = 3;
+    if (playerCount > 6) playerCount = 6;
+
+    // Parse player names, fill with defaults if not enough
+    let names = playerNamesInput.value.split(",").map(n => n.trim()).filter(n => n.length > 0);
+    while (names.length < playerCount) {
+      names.push(`Player${names.length + 1}`);
+    }
+    names = names.slice(0, playerCount);
+
+    // Filter characters based on LGBTQ option
+    let charactersPool = includeLGBTQ ? allCharacters : allCharacters.filter(c => !c.lgbtq);
+
+    // Shuffle and pick characters for players
+    charactersPool = shuffleArray(charactersPool);
+    const selectedCharacters = charactersPool.slice(0, playerCount);
+
+    // Assign characters to players
+    const assignedCharacters = names.map((name, idx) => {
+      let char = selectedCharacters[idx];
+      return { name: name, ...char };
+    });
+
+    // Select clues (5 clues)
+    const clues = shuffleArray(allClues).slice(0, 5);
+
+    // Killer is first character randomly chosen from assigned characters
+    const killer = assignedCharacters[Math.floor(Math.random() * assignedCharacters.length)];
+
+    // Build output HTML
+    let html = `<h2>Setting</h2><p>${setting}</p>`;
+    html += `<h2>Characters</h2>`;
+    assignedCharacters.forEach(c => {
+      html += `<div><strong>${c.name}</strong> – ${c.role}<br>Secret: ${c.secret}<br>Motive: ${c.motive}</div><br>`;
+    });
+
+    html += `<h2>Clues</h2><ul>`;
+    clues.forEach(clue => html += `<li>${clue}</li>`);
+    html += `</ul>`;
+
+    html += `<h2>Instructions</h2><p>Each player receives their role and secret. Reveal clues one by one. After all clues, guess the killer. Then reveal the final solution.</p>`;
+
+    html += `<h2>Final Reveal</h2><p><strong>The killer is: ${killer.name} (${killer.role})</strong><br>Motive: ${killer.motive}</p>`;
+
+    output.innerHTML = html;
+    output.style.display = "block";
+
+    // Save current content for PDF export
+    window.currentMystery = { setting, assignedCharacters, clues, killer };
+  }
+
+  async function downloadPDF() {
+    if (!window.currentMystery) {
+      alert("Please generate a mystery first!");
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    let y = 10;
+    const lineHeight = 10;
+    const pageHeight = 290;
+
+    doc.setFontSize(18);
+    doc.text("Murder Mystery Game", 105, y, null, null, "center");
+    y += lineHeight + 5;
+
+    doc.setFontSize(14);
+    doc.text("Setting:", 10, y);
+    y += lineHeight;
+    const settingLines = doc.splitTextToSize(window.currentMystery.setting, 190);
+    settingLines.forEach(line => {
+      if (y + lineHeight > pageHeight) {
+        doc.addPage();
+        y = 10;
+      }
+      doc.text(line, 10, y);
+      y += lineHeight;
+    });
+    y += 5;
+
+    doc.setFontSize(14);
+    doc.text("Characters:", 10, y);
+    y += lineHeight;
+    window.currentMystery.assignedCharacters.forEach(c => {
+      const text = `${c.name} – ${c.role}\nSecret: ${c.secret}\nMotive: ${c.motive}`;
+      const lines = doc.splitTextToSize(text, 190);
+      lines.forEach(line => {
+        if (y + lineHeight > pageHeight) {
+          doc.addPage();
+          y = 10;
+        }
+        doc.setFontSize(12);
+        doc.text(line, 10, y);
+        y += lineHeight;
+      });
+      y += 5;
+    });
+
+    doc.setFontSize(14);
+    doc.text("Clues:", 10, y);
+    y += lineHeight;
+    window.currentMystery.clues.forEach(clue => {
+      const lines = doc.splitTextToSize("- " + clue, 190);
+      lines.forEach(line => {
+        if (y + lineHeight > pageHeight) {
+          doc.addPage();
+          y = 10;
+        }
+        doc.setFontSize(12);
+        doc.text(line, 10, y);
+        y += lineHeight;
+      });
+    });
+    y += 5;
+
+    doc.setFontSize(14);
+    doc.text("Final Reveal:", 10, y);
+    y += lineHeight;
+    const finalText = `The killer is: ${window.currentMystery.killer.name} (${window.currentMystery.killer.role})\nMotive: ${window.currentMystery.killer.motive}`;
+    const finalLines = doc.splitTextToSize(finalText, 190);
+    finalLines.forEach(line => {
+      if (y + lineHeight > pageHeight) {
+        doc.addPage();
+        y = 10;
+      }
+      doc.setFontSize(12);
+      doc.text(line, 10, y);
+      y += lineHeight;
+    });
+
+    doc.save("murder_mystery_game.pdf");
+  }
+</script>
+
+</body>
+</html>
