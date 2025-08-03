@@ -30,13 +30,13 @@
     <option value="Luxury cruise ship">Luxury cruise ship</option>
     <option value="Remote mountain inn">Remote mountain inn</option>
     <option value="Tech startup office">Tech startup office</option>
-    <option value="Gothic mansion during a thunderstorm">Gothic mansion during a thunderstorm</option>
-    <option value="Space Station Orbiting Earth">Space Station Orbiting Earth</option>
-    <option value="Haunted Victorian Hotel">Haunted Victorian Hotel</option>
+    <option value="Apartment Building",>Apartment Building</option>
+    <option value="Prile">Prile</option>
+    <option value="Haunted Old Japanese Hotel">Haunted Old Japanese Hotel</option>
   </select>
 
-  <label for="playerCount">Number of Players (3 to 6)</label>
-  <input type="number" id="playerCount" value="3" min="3" max="6" />
+  <label for="playerCount">Number of Players (3 to 10)</label>
+  <input type="number" id="playerCount" value="3" min="3" max="10" />
 
   <label for="playerNamesInput">Player Names (comma separated)</label>
   <input type="text" id="playerNamesInput" placeholder="e.g. Alice, Bob, Charlie" />
@@ -55,9 +55,9 @@
     "Luxury cruise ship",
     "Remote mountain inn",
     "Tech startup office",
-    "Gothic mansion during a thunderstorm",
-    "Space Station Orbiting Earth",
-    "Haunted Victorian Hotel"
+    "Apartment Building",
+    "Prile",
+    "Haunted Old Japanese Hotel"
   ];
 
   const allCharacters = [
@@ -66,6 +66,7 @@
     { role: "Bartender and former lover", secret: "Threatened Ren after discovering betrayal", motive: "Keep the bar from being sold", lgbtq: false },
     { role: "Tech Genius", secret: "Hacked sensitive files", motive: "Prevent exposure of illegal activities", lgbtq: false },
     { role: "Fashion Blogger", secret: "Stole designs from a rival", motive: "Maintain reputation", lgbtq: true },
+    { role: "Lover", secret: "wants to make relationship public", motive: "Victim is married", lgbtq: false }
     { role: "Journalist", secret: "Investigating corruption", motive: "Get the scoop first", lgbtq: false }
   ];
 
@@ -232,4 +233,5 @@
 
 </body>
 </html>
+
 
